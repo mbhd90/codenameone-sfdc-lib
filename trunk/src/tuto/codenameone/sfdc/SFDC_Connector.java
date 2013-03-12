@@ -23,9 +23,9 @@ import tuto.codenameone.sfdc.internal.__ActionListener;
 import tuto.codenameone.sfdc.utils.SFDC_ConnectionStatus;
 
 /**
- * This is a demo class to help you get started building a library
+ * SFDC Connector for CodenameOne
  *
- * @author Your name here
+ * @author BCirot (Tuto-CodenameOne)
  */
 public class SFDC_Connector extends __IOHandler {
     
@@ -34,11 +34,11 @@ public class SFDC_Connector extends __IOHandler {
     private static String sandboxLoginURL = "https://test.salesforce.com/services/oauth2/token";
     
     // Access Token Response parameters
-    private String access_token;
-    private String instance_url;
-    private String id;
-    private String issued_at;
-    private String signature;
+    public String access_token;
+    public String instance_url;
+    public String id;
+    public String issued_at;
+    public String signature;
     
     // Services
     private String listApiVersionsURL = "/services/data/";
@@ -107,7 +107,7 @@ public class SFDC_Connector extends __IOHandler {
         }
     }
     
-    private __ActionListener connectionListener = new __ActionListener(this) {
+    private ActionListener connectionListener = new ActionListener() {
             
         public void actionPerformed(ActionEvent evt) {
             try {
@@ -130,7 +130,7 @@ public class SFDC_Connector extends __IOHandler {
                 Log.p("Signature : " + signature);
 
                 // Create Result Event
-                SFDC_ConnectionEvent event = new SFDC_ConnectionEvent((SFDC_Connector)source, SFDC_ConnectionStatus.SUCCESS, "");
+                SFDC_ConnectionEvent event = new SFDC_ConnectionEvent(this, SFDC_ConnectionStatus.SUCCESS, "");
                 // Send response
                 if (hasResponseListeners()) {
                     fireResponseListener(event);
