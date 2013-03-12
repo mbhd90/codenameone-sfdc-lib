@@ -5,23 +5,27 @@
 package tuto.codenameone.sfdc.event;
 
 import com.codename1.ui.events.ActionEvent;
-import tuto.codenameone.sfdc.SFDC_Connector;
+import java.util.Hashtable;
 import tuto.codenameone.sfdc.utils.SFDC_ConnectionStatus;
+import tuto.codenameone.sfdc.utils.SFDC_QueryStatus;
 
 /**
  *
  * @author bcirot
  */
-public class SFDC_ConnectionEvent extends ActionEvent {
+public class SFDC_QueryEvent extends ActionEvent {
     
     private String status;
 
     private String message;
     
-    public SFDC_ConnectionEvent(Object source, String status, String message) {
+    private Hashtable datas;
+    
+    public SFDC_QueryEvent(Object source, String status, String message, Hashtable dats) {
         super(source);
         this.status = status;
         this.message = message;
+        this.datas = datas;
     }
     
     public String getStatus() {
@@ -30,5 +34,9 @@ public class SFDC_ConnectionEvent extends ActionEvent {
 
     public String getMessage() {
         return message;
+    }
+
+    public Hashtable getDatas() {
+        return datas;
     }
 }
