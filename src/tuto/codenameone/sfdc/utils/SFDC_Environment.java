@@ -8,6 +8,8 @@ package tuto.codenameone.sfdc.utils;
  *
  * @author bcirot
  */
-public enum SFDC_Environment {
-    SANDBOX, DEVELOPER, PRODUCTION;
+public class SFDC_Environment {
+    public final static String SANDBOX = "sand";
+    public final static String DEVELOPER = "dev";
+    public final static String PRODUCTION = "prod";
 }

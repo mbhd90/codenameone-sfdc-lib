@@ -19,8 +19,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Hashtable;
 import tuto.codenameone.sfdc.event.SFDC_ConnectionEvent;
+import tuto.codenameone.sfdc.event.SFDC_QueryEvent;
 import tuto.codenameone.sfdc.internal.__ActionListener;
 import tuto.codenameone.sfdc.utils.SFDC_ConnectionStatus;
+import tuto.codenameone.sfdc.utils.SFDC_QueryStatus;
 
 /**
  * SFDC Connector for CodenameOne
@@ -43,36 +45,31 @@ public class SFDC_Connector extends __IOHandler {
     // Services
     private String listApiVersionsURL = "/services/data/";
     private String listResourcesURL = "/services/data/v26.0/";
+    private String queryURL = "query/";
     
     private ConnectionRequest request;
-    private SFDC_Environment currentEnvironment;
+    private String currentEnvironment;
     
     /**
      * Contructor
      */
-    public SFDC_Connector(SFDC_Environment environement) {
+    public SFDC_Connector(String environement) {
         this.currentEnvironment = environement;
     }
     
-    public void connect(String login, String password, String clientId, String clientSecret) {
-        initConnectionRequest(login, password, clientId, clientSecret, null);
+    public void connect(String login, String password, String consumerKey, String consumerSecret) {
+        initConnectionRequest(login, password, consumerKey, consumerSecret, null);
     }
     
-    public void connect(String login, String password, String clientId, String clientSecret, String securityToken) {
-        initConnectionRequest(login, password, clientId, clientSecret, securityToken);
+    public void connect(String login, String password, String consumerKey, String consumerSecret, String securityToken) {
+        initConnectionRequest(login, password, consumerKey, consumerSecret, securityToken);
     }
     
     private void initConnectionRequest(String login, String password, String clientId, String clientSecret, String securityToken) {
         request = new ConnectionRequest();
         request.setPost(true);
         
-        String loginURL;
-        if (currentEnvironment.equals(SFDC_Environment.PRODUCTION)) {
-            loginURL = prodLoginURL;
-        } else {
-            loginURL = sandboxLoginURL;
-        }
-        request.setUrl(loginURL);
+        request.setUrl(getSFDCConnectionURL());
         
         request.addArgument("grant_type", "password");
         request.addArgument("client_id", clientId);
@@ -89,7 +86,18 @@ public class SFDC_Connector extends __IOHandler {
         NetworkManager.getInstance().addToQueue(request);
     }
     
-    public void addConnectionListener(ActionListener a) {
+    private String getSFDCConnectionURL() {
+        String loginURL;
+        if (currentEnvironment.equals(SFDC_Environment.SANDBOX)) {
+            loginURL = sandboxLoginURL;
+        } else {
+            loginURL = prodLoginURL;
+        }
+        return loginURL;
+        
+    }
+    
+    public void addListener(ActionListener a) {
         if(actionListeners == null) {
             actionListeners = new EventDispatcher();
             actionListeners.setBlocking(false);
@@ -97,7 +105,7 @@ public class SFDC_Connector extends __IOHandler {
         actionListeners.addListener(a);
     }
     
-    public void removeConnectionListener(ActionListener a) {
+    public void removeListener(ActionListener a) {
         if(actionListeners == null) {
             return;
         }
@@ -142,4 +150,43 @@ public class SFDC_Connector extends __IOHandler {
         }
     };
     
+    public void executeQuery(String query) {
+        request = new ConnectionRequest();
+        request.setPost(false);
+        
+        request.setUrl(instance_url + listResourcesURL + queryURL);
+        
+        request.addRequestHeader("Authorization", "OAuth " + access_token);
+        request.addArgument("q", query);
+        
+        request.addResponseListener(queryListener);
+        
+        NetworkManager.getInstance().addToQueue(request);
+    }
+    
+    
+    private ActionListener queryListener = new ActionListener() {
+            
+        public void actionPerformed(ActionEvent evt) {
+            try {
+                NetworkEvent networkEvt = (NetworkEvent)evt;
+                Log.p("Server response : " + networkEvt.getResponseCode());
+                byte[] dataArray = (byte[]) networkEvt.getMetaData();
+                Log.p("Response datas : " + new String(dataArray));
+                InputStream input = new ByteArrayInputStream(dataArray);
+                JSONParser p = new JSONParser();
+                Hashtable hashTable = p.parse(new InputStreamReader(input));
+                
+                // Create Result Event
+                SFDC_QueryEvent event = new SFDC_QueryEvent(this, SFDC_QueryStatus.SUCCESS, "", hashTable);
+                // Send response
+                if (hasResponseListeners()) {
+                    fireResponseListener(event);
+                }
+                
+            } catch (IOException ex) {
+                Log.e(ex);
+            }
+        }
+    };
 }
