@@ -144,6 +144,8 @@ public class SFDC_Connector extends __IOHandler {
                     fireResponseListener(event);
                 }
                 
+                actionListeners = new EventDispatcher();
+                        
             } catch (IOException ex) {
                 Log.e(ex);
             }
@@ -178,15 +180,76 @@ public class SFDC_Connector extends __IOHandler {
                 Hashtable hashTable = p.parse(new InputStreamReader(input));
                 
                 // Create Result Event
-                SFDC_QueryEvent event = new SFDC_QueryEvent(this, SFDC_QueryStatus.SUCCESS, "", hashTable);
+                SFDC_QueryEvent event = new SFDC_QueryEvent(this, SFDC_QueryStatus.SUCCESS, new String(dataArray), hashTable);
                 // Send response
                 if (hasResponseListeners()) {
                     fireResponseListener(event);
                 }
+                
+                actionListeners = new EventDispatcher();
                 
             } catch (IOException ex) {
                 Log.e(ex);
             }
         }
     };
+    
+    // Newwwwwwwwwwwwwwwwwwwwwwwwwwww
+    
+    private void getApiVersions() {
+        // Get API Versions
+        request = new ConnectionRequest();
+        request.setPost(false);
+        request.setUrl(instance_url + listApiVersionsURL);
+        request.addResponseListener(new ActionListener() {
+            
+            public void actionPerformed(ActionEvent evt) {
+                try {
+                    NetworkEvent networkEvt = (NetworkEvent)evt;
+                    Log.p("Server response : " + networkEvt.getResponseCode());
+                    byte[] dataArray = (byte[]) networkEvt.getMetaData();
+                    Log.p("Response datas : " + new String(dataArray));
+                    InputStream input = new ByteArrayInputStream(dataArray);
+                    JSONParser p = new JSONParser();
+                    Hashtable hashTable = p.parse(new InputStreamReader(input));
+                    Log.p("API Versions : " + hashTable);
+                } catch (IOException ex) {
+                    Log.p("IOException : " + ex.getMessage() != null ? ex.getMessage():ex.toString());
+                    ex.printStackTrace();
+                }
+            }
+            
+        });
+        
+        NetworkManager.getInstance().addToQueue(request);
+    }
+    
+    private void getAvailableResources() {
+        // Get API Versions
+        request = new ConnectionRequest();
+        request.setPost(false);
+        request.setUrl(instance_url + listResourcesURL);
+        request.addRequestHeader("Authorization", "OAuth " + access_token);
+        request.addResponseListener(new ActionListener() {
+            
+            public void actionPerformed(ActionEvent evt) {
+                try {
+                    NetworkEvent networkEvt = (NetworkEvent)evt;
+                    Log.p("Server response : " + networkEvt.getResponseCode());
+                    byte[] dataArray = (byte[]) networkEvt.getMetaData();
+                    Log.p("Response datas : " + new String(dataArray));
+                    InputStream input = new ByteArrayInputStream(dataArray);
+                    JSONParser p = new JSONParser();
+                    Hashtable hashTable = p.parse(new InputStreamReader(input));
+                    Log.p("API Versions : " + hashTable);
+                } catch (IOException ex) {
+                    Log.p("IOException : " + ex.getMessage() != null ? ex.getMessage():ex.toString());
+                    ex.printStackTrace();
+                }
+            }
+            
+        });
+        
+        NetworkManager.getInstance().addToQueue(request);
+    }
 }
