@@ -5,8 +5,6 @@
 package tuto.codenameone.sfdc.event;
 
 import com.codename1.ui.events.ActionEvent;
-import tuto.codenameone.sfdc.SFDC_Connector;
-import tuto.codenameone.sfdc.utils.SFDC_ConnectionStatus;
 
 /**
  *

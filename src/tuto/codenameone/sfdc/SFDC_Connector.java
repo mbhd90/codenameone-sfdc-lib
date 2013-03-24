@@ -12,15 +12,15 @@ import com.codename1.io.NetworkEvent;
 import com.codename1.io.NetworkManager;
 import com.codename1.ui.events.ActionEvent;
 import com.codename1.ui.events.ActionListener;
-import com.codename1.ui.util.EventDispatcher;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Hashtable;
+import java.util.Vector;
 import tuto.codenameone.sfdc.event.SFDC_ConnectionEvent;
 import tuto.codenameone.sfdc.event.SFDC_QueryEvent;
-import tuto.codenameone.sfdc.internal.__ActionListener;
+import tuto.codenameone.sfdc.object.SFDC_Account;
 import tuto.codenameone.sfdc.utils.SFDC_ConnectionStatus;
 import tuto.codenameone.sfdc.utils.SFDC_QueryStatus;
 
@@ -49,6 +49,8 @@ public class SFDC_Connector extends __IOHandler {
     
     private ConnectionRequest request;
     private String currentEnvironment;
+    
+    private Class queryObjectType;
     
     /**
      * Contructor
@@ -97,24 +99,6 @@ public class SFDC_Connector extends __IOHandler {
         
     }
     
-    public void addListener(ActionListener a) {
-        if(actionListeners == null) {
-            actionListeners = new EventDispatcher();
-            actionListeners.setBlocking(false);
-        }
-        actionListeners.addListener(a);
-    }
-    
-    public void removeListener(ActionListener a) {
-        if(actionListeners == null) {
-            return;
-        }
-        actionListeners.removeListener(a);
-        if(actionListeners.getListenerVector() == null || actionListeners.getListenerVector().size() == 0) {
-            actionListeners = null;
-        }
-    }
-    
     private ActionListener connectionListener = new ActionListener() {
             
         public void actionPerformed(ActionEvent evt) {
@@ -140,11 +124,11 @@ public class SFDC_Connector extends __IOHandler {
                 // Create Result Event
                 SFDC_ConnectionEvent event = new SFDC_ConnectionEvent(this, SFDC_ConnectionStatus.SUCCESS, "");
                 // Send response
-                if (hasResponseListeners()) {
-                    fireResponseListener(event);
+                if (hasConnectionListeners()) {
+                    fireConnectionListener(event);
                 }
                 
-                actionListeners = new EventDispatcher();
+                // connectionListeners = new EventDispatcher();
                         
             } catch (IOException ex) {
                 Log.e(ex);
@@ -153,6 +137,16 @@ public class SFDC_Connector extends __IOHandler {
     };
     
     public void executeQuery(String query) {
+        queryObjectType = null;
+        launchQuery(query);
+    }
+    
+    public void executeQuery(String query, Class objectType) {
+        queryObjectType = objectType;
+        launchQuery(query);
+    }
+    
+    private void launchQuery(String query) {
         request = new ConnectionRequest();
         request.setPost(false);
         
@@ -180,19 +174,22 @@ public class SFDC_Connector extends __IOHandler {
                 Hashtable hashTable = p.parse(new InputStreamReader(input));
                 
                 // Create Result Event
-                SFDC_QueryEvent event = new SFDC_QueryEvent(this, SFDC_QueryStatus.SUCCESS, new String(dataArray), hashTable);
+                Vector result = (Vector) hashTable.get("records");
+                SFDC_QueryEvent event = new SFDC_QueryEvent(this, SFDC_QueryStatus.SUCCESS, new String(dataArray), result);
                 // Send response
-                if (hasResponseListeners()) {
-                    fireResponseListener(event);
+                if (hasQueryListeners()) {
+                    fireQueryListener(event);
                 }
                 
-                actionListeners = new EventDispatcher();
+                // queryListeners = new EventDispatcher();
                 
             } catch (IOException ex) {
                 Log.e(ex);
             }
         }
     };
+    
+    
     
     // Newwwwwwwwwwwwwwwwwwwwwwwwwwww
     
