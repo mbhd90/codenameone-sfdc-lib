@@ -5,8 +5,6 @@
 package tuto.codenameone.sfdc.event;
 
 import com.codename1.ui.events.ActionEvent;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.Vector;
 
 /**
