@@ -20,7 +20,6 @@ import java.util.Hashtable;
 import java.util.Vector;
 import tuto.codenameone.sfdc.event.SFDC_ConnectionEvent;
 import tuto.codenameone.sfdc.event.SFDC_QueryEvent;
-import tuto.codenameone.sfdc.object.SFDC_Account;
 import tuto.codenameone.sfdc.utils.SFDC_ConnectionStatus;
 import tuto.codenameone.sfdc.utils.SFDC_QueryStatus;
 
