@@ -6,8 +6,8 @@ package tuto.codenameone.sfdc.event;
 
 import com.codename1.ui.events.ActionEvent;
 import java.util.Hashtable;
-import tuto.codenameone.sfdc.utils.SFDC_ConnectionStatus;
-import tuto.codenameone.sfdc.utils.SFDC_QueryStatus;
+import java.util.List;
+import java.util.Vector;
 
 /**
  *
@@ -19,13 +19,13 @@ public class SFDC_QueryEvent extends ActionEvent {
 
     private String message;
     
-    private Hashtable datas;
+    private Vector datas;
     
-    public SFDC_QueryEvent(Object source, String status, String message, Hashtable dats) {
+    public SFDC_QueryEvent(Object source, String status, String message, Vector rawDatas) {
         super(source);
         this.status = status;
         this.message = message;
-        this.datas = datas;
+        this.datas = rawDatas;
     }
     
     public String getStatus() {
@@ -35,8 +35,8 @@ public class SFDC_QueryEvent extends ActionEvent {
     public String getMessage() {
         return message;
     }
-
-    public Hashtable getDatas() {
+    
+    public Vector getDatas() {
         return datas;
     }
 }
