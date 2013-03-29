@@ -49,7 +49,6 @@ public class SFDC_Connector extends __IOHandler {
     private ConnectionRequest request;
     private String currentEnvironment;
     
-    private Class queryObjectType;
     
     /**
      * Contructor
@@ -136,12 +135,6 @@ public class SFDC_Connector extends __IOHandler {
     };
     
     public void executeQuery(String query) {
-        queryObjectType = null;
-        launchQuery(query);
-    }
-    
-    public void executeQuery(String query, Class objectType) {
-        queryObjectType = objectType;
         launchQuery(query);
     }
     
